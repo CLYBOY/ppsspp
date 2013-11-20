@@ -611,7 +611,7 @@ UI::EventReturn MainScreen::OnExit(UI::EventParams &e) {
 }
 
 void MainScreen::dialogFinished(const Screen *dialog, DialogResult result) {
-	if (dynamic_cast<const StoreScreen *>(dialog) != 0) {
+	if (dialog->tag() == "store") {
 		backFromStore_ = true;
 		RecreateViews();
 	}
