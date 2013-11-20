@@ -496,6 +496,9 @@
     <ClCompile Include="Dialog\PSPNetconfDialog.cpp">
       <Filter>Dialog</Filter>
     </ClCompile>
+    <ClCompile Include="Util\GameManager.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ELF\ElfReader.h">
@@ -914,6 +917,9 @@
     </ClInclude>
     <ClInclude Include="MIPS\JitCommon\JitState.h">
       <Filter>MIPS\JitCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\GameManager.h">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
