@@ -49,6 +49,7 @@ private:
 	UI::EventReturn OnPPSSPPOrg(UI::EventParams &e);
 	UI::EventReturn OnForums(UI::EventParams &e);
 	UI::EventReturn OnExit(UI::EventParams &e);
+	UI::EventReturn OnHomebrewStore(UI::EventParams &e);
 };
 
 class GamePauseScreen : public UIDialogScreen {
