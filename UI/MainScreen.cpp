@@ -403,6 +403,7 @@ void MainScreen::CreateViews() {
 	Margins actionMenuMargins(0, 10, 10, 0);
 
 	TabHolder *leftColumn = new TabHolder(ORIENT_HORIZONTAL, 64);
+	tabHolder_ = leftColumn;
 	leftColumn->SetClip(true);
 
 	ScrollView *scrollRecentGames = new ScrollView(ORIENT_VERTICAL, new LinearLayoutParams(FILL_PARENT, WRAP_CONTENT));
@@ -412,14 +413,13 @@ void MainScreen::CreateViews() {
 	GameBrowser *tabRecentGames = new GameBrowser(
 		"!RECENT", false, &g_Config.bGridView1, "", "",
 		new LinearLayoutParams(FILL_PARENT, FILL_PARENT));
-	GameBrowser *tabAllGames = new GameBrowser(g_Config.currentDirectory, true, &g_Config.bGridView2, 
+	GameBrowser *tabAllGames = new GameBrowser(g_Config.currentDirectory, true, &g_Config.bGridView2,
 		m->T("How to get games"), "http://www.ppsspp.org/getgames.html",
 		new LinearLayoutParams(FILL_PARENT, FILL_PARENT));
 	GameBrowser *tabHomebrew = new GameBrowser(GetSysDirectory(DIRECTORY_GAME), false, &g_Config.bGridView3,
 		m->T("How to get homebrew & demos"), "http://www.ppsspp.org/gethomebrew.html",
 		new LinearLayoutParams(FILL_PARENT, FILL_PARENT));
 
-	
 	scrollRecentGames->Add(tabRecentGames);
 	scrollAllGames->Add(tabAllGames);
 	scrollHomebrew->Add(tabHomebrew);
@@ -438,8 +438,12 @@ void MainScreen::CreateViews() {
 
 	if (g_Config.recentIsos.size() > 0) {
 		leftColumn->SetCurrentTab(0);
-	}else{
+	} else {
 		leftColumn->SetCurrentTab(1);
+	}
+	if (backFromStore_) {
+		leftColumn->SetCurrentTab(2);
+		backFromStore_ = false;
 	}
 /*
 	if (info) {	
@@ -606,6 +610,13 @@ UI::EventReturn MainScreen::OnExit(UI::EventParams &e) {
 	return UI::EVENT_DONE;
 }
 
+void MainScreen::dialogFinished(const Screen *dialog, DialogResult result) {
+	if (dynamic_cast<const StoreScreen *>(dialog) != 0) {
+		backFromStore_ = true;
+		RecreateViews();
+	}
+}
+
 void GamePauseScreen::update(InputState &input) {
 	UpdateUIState(UISTATE_PAUSEMENU);
 	UIScreen::update(input);
@@ -628,11 +639,11 @@ void GamePauseScreen::DrawBackground(UIContext &dc) {
 		}
 		if (hasPic) {
 			uint32_t color = whiteAlpha(ease((time_now_d() - ginfo->timePic1WasLoaded) * 3)) & 0xFFc0c0c0;
-			dc.Draw()->DrawTexRect(0,0,dp_xres, dp_yres, 0,0,1,1,color);
+			dc.Draw()->DrawTexRect(0,0,dp_xres, dp_yres, 0,0,1,1, color);
 			dc.Flush();
 			dc.RebindTexture();
 		} else {
-			::DrawBackground(1.0f);			
+			::DrawBackground(1.0f);
 			dc.RebindTexture();
 			dc.Flush();
 		}

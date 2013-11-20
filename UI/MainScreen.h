@@ -28,7 +28,7 @@
 
 class MainScreen : public UIScreenWithBackground {
 public:
-	MainScreen() {}
+	MainScreen() : backFromStore_(false) {}
 
 	virtual bool isTopLevel() const { return true; }
 
@@ -36,6 +36,7 @@ protected:
 	virtual void CreateViews();
 	virtual void update(InputState &input);
 	virtual void sendMessage(const char *message, const char *value);
+	virtual void dialogFinished(const Screen *dialog, DialogResult result);
 
 private:
 	UI::EventReturn OnGameSelected(UI::EventParams &e);
@@ -50,6 +51,10 @@ private:
 	UI::EventReturn OnForums(UI::EventParams &e);
 	UI::EventReturn OnExit(UI::EventParams &e);
 	UI::EventReturn OnHomebrewStore(UI::EventParams &e);
+
+	UI::TabHolder *tabHolder_;
+
+	bool backFromStore_;
 };
 
 class GamePauseScreen : public UIDialogScreen {
