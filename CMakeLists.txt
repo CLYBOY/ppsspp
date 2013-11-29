@@ -10,13 +10,17 @@ if(ANDROID)
 endif()
 
 if(BLACKBERRY)
-	set(CMAKE_SYSTEM_NAME "QNX")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__STDC_CONSTANT_MACROS")
 endif()
 
 if (IOS OR BLACKBERRY)
-	set(ARM ON)
-	set(USE_FFMPEG ON)
+	if (SIMULATOR)
+		set(X86 ON)
+	else()
+		set(ARM ON)
+		set(ARMEABI_V7A ON)
+		set(USE_FFMPEG ON)
+	endif()
 endif()
 
 if (MAEMO)
@@ -29,7 +33,7 @@ if(LOONGSON)
 	set(MIPS ON) # MIPS + x86 for now
 endif()
 
-if(ARM)
+if(ARM OR SIMULATOR)
 	set(USING_GLES2 ON)
 else() # Assume x86
 	set(X86 ON)
@@ -64,6 +68,7 @@ option(IOS "Set to ON if targeting an iOS device" ${IOS})
 option(USING_GLES2 "Set to ON if target device uses OpenGL ES 2.0" ${USING_GLES2})
 option(USING_QT_UI "Set to ON if you wish to use the Qt frontend wrapper" ${USING_QT_UI})
 option(HEADLESS "Set to OFF to not generate the PPSSPPHeadless target" ${HEADLESS})
+option(SIMULATOR "Set to ON when targeting an x86 simulator of an ARM platform" ${SIMULATOR})
 option(USE_FFMPEG "Build with FFMPEG support" ${USE_FFMPEG})
 
 if(ANDROID)
@@ -160,7 +165,10 @@ if(NOT MSVC)
 	endif()
 
 	if(BLACKBERRY)
-		add_definitions(-D_QNX_SOURCE -DARMV7 -O3 -mfpu=neon -mtune=cortex-a9)
+		add_definitions(-D_QNX_SOURCE)
+		if(ARM)
+			add_definitions(-DARMV7 -O3 -mfpu=neon -mcpu=cortex-a9)
+		endif()
 	endif()
 
 	if(X86 AND NOT MIPS)
@@ -326,6 +334,13 @@ add_library(snappy STATIC
 )
 include_directories(ext/snappy)
 
+add_library(vjson STATIC
+	native/ext/vjson/json.cpp
+	native/ext/vjson/json.h
+	native/ext/vjson/block_allocator.cpp
+	native/ext/vjson/block_allocator.h
+)
+
 add_library(rg_etc1 STATIC
 	native/ext/rg_etc1/rg_etc1.cpp
 	native/ext/rg_etc1/rg_etc1.h)
@@ -464,7 +479,10 @@ elseif(SDL_FOUND)
 	set(TargetBin PPSSPPSDL)
 	# Require SDL
 	include_directories(${SDL_INCLUDE_DIR})
-	set(nativeExtra ${nativeExtra} native/base/PCMain.cpp)
+	set(nativeExtra ${nativeExtra} 
+		SDL/SDLJoystick.h
+		SDL/SDLJoystick.cpp
+		native/base/PCMain.cpp)
 	set(nativeExtraLibs ${nativeExtraLibs} ${SDL_LIBRARY})
 	if(APPLE)
 		set(nativeExtra ${nativeExtra} SDL/SDLMain.h SDL/SDLMain.mm)
@@ -513,10 +531,6 @@ add_library(native STATIC
 	native/base/timeutil.h
 	native/data/compression.cpp
 	native/data/compression.h
-	native/ext/vjson/json.cpp
-	native/ext/vjson/json.h
-	native/ext/vjson/block_allocator.cpp
-	native/ext/vjson/block_allocator.h
 	native/file/chunk_file.cpp
 	native/file/chunk_file.h
 	native/file/dialog.cpp
@@ -632,13 +646,15 @@ add_library(native STATIC
 	native/util/random/rng.h
 	native/util/text/utf8.h
 	native/util/text/utf8.cpp
+	native/util/text/parsers.h
+	native/util/text/parsers.cpp
 	native/util/const_map.h
 	native/ext/jpge/jpgd.cpp
 	native/ext/jpge/jpgd.h
 	native/ext/jpge/jpge.cpp
 	native/ext/jpge/jpge.h)
 include_directories(native)
-target_link_libraries(native ${LIBZIP} rg_etc1 stb_image stb_vorbis snappy libzip ${GLEW_LIBRARIES})
+target_link_libraries(native ${LIBZIP} rg_etc1 vjson stb_image stb_vorbis snappy libzip ${GLEW_LIBRARIES})
 
 if(ANDROID)
 	target_link_libraries(native log)
@@ -690,6 +706,8 @@ if(ARM)
 		Core/MIPS/ARM/ArmRegCache.h
 		Core/MIPS/ARM/ArmRegCacheFPU.cpp
 		Core/MIPS/ARM/ArmRegCacheFPU.h
+		GPU/GLES/VertexDecoderArm.cpp
+		GPU/GLES/VertexDecoder.h
 		ext/disarm.cpp)
 elseif(X86)
 	set(CoreExtra ${CoreExtra}
@@ -706,6 +724,8 @@ elseif(X86)
 		Core/MIPS/x86/RegCache.h
 		Core/MIPS/x86/RegCacheFPU.cpp
 		Core/MIPS/x86/RegCacheFPU.h
+		GPU/GLES/VertexDecoderX86.cpp
+		GPU/GLES/VertexDecoder.h
 		ext/disarm.cpp)
 endif()
 
@@ -852,6 +872,8 @@ add_library(${CoreLibName} ${CoreLinkType}
 	Core/HLE/sceNet.h
 	Core/HLE/sceNetAdhoc.cpp
 	Core/HLE/sceNetAdhoc.h
+	Core/HLE/proAdhoc.h
+	Core/HLE/proAdhoc.cpp
 	Core/HLE/sceOpenPSID.cpp
 	Core/HLE/sceOpenPSID.h
 	Core/HLE/sceP3da.cpp
@@ -975,7 +997,7 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/git-version.cpp
 	PROPERTIES GENERATED TRUE)
 add_dependencies(${CoreLibName} GitVersion)
 
-if(BLACKBERRY OR IOS OR ARMEABI_V7A)
+if(ARMEABI_V7A)
 	set(GPU_NEON GPU/Common/TextureDecoderNEON.cpp)
 endif()
 add_library(GPU OBJECT

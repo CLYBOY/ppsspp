@@ -34,10 +34,10 @@
 #include "base/NativeApp.h"
 #include "file/vfs.h"
 #include "file/zip_read.h"
-#include "native/ext/stb_image_write/stb_image_writer.h"
-#include "native/ext/jpge/jpge.h"
-#include "native/util/text/utf8.h"
-#include "native/thread/thread.h"
+#include "ext/stb_image_write/stb_image_writer.h"
+#include "ext/jpge/jpge.h"
+#include "thread/thread.h"
+#include "net/http_client.h"
 #include "gfx_es2/gl_state.h"
 #include "gfx_es2/draw_text.h"
 #include "gfx_es2/draw_buffer.h"
@@ -51,6 +51,7 @@
 #include "ui/screen.h"
 #include "ui/ui_context.h"
 #include "ui/view.h"
+#include "util/text/utf8.h"
 
 #include "Common/FileUtil.h"
 #include "Common/LogManager.h"
@@ -245,18 +246,17 @@ void NativeInit(int argc, const char *argv[],
 	// It's common to be in a build-xyz/ directory.
 	else
 		VFSRegister("", new DirectoryAssetReader((File::GetExeDirectory() + "../assets/").c_str()));
+	VFSRegister("", new DirectoryAssetReader((File::GetExeDirectory()).c_str()));
 #endif
 
 	// We want this to be FIRST.
 #ifdef USING_QT_UI
 	VFSRegister("", new AssetsAssetReader());
-#else
-#if defined(BLACKBERRY) || defined(IOS)
+#elif defined(BLACKBERRY) || defined(IOS)
 	// Packed assets are included in app
 	VFSRegister("", new DirectoryAssetReader(external_directory));
 #else
 	VFSRegister("", new DirectoryAssetReader("assets/"));
-#endif
 #endif
 	VFSRegister("", new DirectoryAssetReader(savegame_directory));
 
@@ -273,7 +273,12 @@ void NativeInit(int argc, const char *argv[],
 	g_Config.memCardDirectory = user_data_path;
 	g_Config.flash0Directory = std::string(external_directory) + "/flash0/";
 #elif !defined(_WIN32)
-	g_Config.memCardDirectory = std::string(getenv("HOME")) + "/.ppsspp/";
+	char* config = getenv("XDG_CONFIG_HOME");
+	if (!config) {
+		config = getenv("HOME");
+		strcat(config, "/.config");
+	}
+	g_Config.memCardDirectory = std::string(config) + "/ppsspp/";
 	std::string program_path = File::GetExeDirectory();
 	if (program_path.empty())
 		g_Config.flash0Directory = g_Config.memCardDirectory + "/flash0/";
@@ -379,10 +384,6 @@ void NativeInit(int argc, const char *argv[],
 		logman->AddListener(type, logger);
 #endif
 	}
-#ifdef __SYMBIAN32__
-	g_Config.bSeparateCPUThread = false;
-	g_Config.bSeparateIOThread = false;
-#endif
 	// Special hack for G3D as it's very spammy. Need to make a flag for this.
 	if (!gfxLog)
 		logman->SetLogLevel(LogTypes::G3D, LogTypes::LERROR);
@@ -602,6 +603,7 @@ void NativeUpdate(InputState &input) {
 		}
 	}
 
+	g_DownloadManager.Update();
 	screenManager->update(input);
 }
 

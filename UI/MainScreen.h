@@ -51,10 +51,13 @@ private:
 	UI::EventReturn OnForums(UI::EventParams &e);
 	UI::EventReturn OnExit(UI::EventParams &e);
 	UI::EventReturn OnHomebrewStore(UI::EventParams &e);
+	UI::EventReturn OnDownloadUpgrade(UI::EventParams &e);
+	UI::EventReturn OnDismissUpgrade(UI::EventParams &e);
 
 	UI::TabHolder *tabHolder_;
 
 	bool backFromStore_;
+	UI::LinearLayout *upgradeBar_;
 };
 
 class GamePauseScreen : public UIDialogScreen {
@@ -79,14 +82,31 @@ private:
 	UI::EventReturn OnLoadState(UI::EventParams &e);
 	UI::EventReturn OnRewind(UI::EventParams &e);
 
-	UI::EventReturn OnLanguageChange(UI::EventParams &e);
-
 	UI::EventReturn OnStateSelected(UI::EventParams &e);
 	UI::EventReturn OnCwCheat(UI::EventParams &e);
+
+	UI::EventReturn OnSwitchUMD(UI::EventParams &e);
 
 	std::string gamePath_;
 
 	UI::ChoiceStrip *saveSlots_;
 	UI::Choice *saveStateButton_;
 	UI::Choice *loadStateButton_;
+};
+
+class UmdReplaceScreen : public UIDialogScreenWithBackground {
+public:
+	UmdReplaceScreen() {}
+
+protected:
+	virtual void CreateViews();
+	virtual void update(InputState &input);
+	//virtual void sendMessage(const char *message, const char *value);
+
+private:
+	UI::EventReturn OnGameSelected(UI::EventParams &e);
+	UI::EventReturn OnGameSelectedInstant(UI::EventParams &e);
+
+	UI::EventReturn OnCancel(UI::EventParams &e);
+	UI::EventReturn OnGameSettings(UI::EventParams &e);
 };

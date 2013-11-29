@@ -35,7 +35,7 @@
 // All functions should have CONDITIONAL_DISABLE, so we can narrow things down to a file quickly.
 // Currently known non working ones should have DISABLE.
 
-// #define CONDITIONAL_DISABLE { fpr.ReleaseSpillLocks(); Comp_Generic(op); return; }
+// #define CONDITIONAL_DISABLE { fpr.ReleaseSpillLocksAndDiscardTemps(); Comp_Generic(op); return; }
 #define CONDITIONAL_DISABLE ;
 #define DISABLE { fpr.ReleaseSpillLocksAndDiscardTemps(); Comp_Generic(op); return; }
 #define NEON_IF_AVAILABLE(func) { if (jo.useNEONVFPU) { func(op); return; } }
@@ -50,6 +50,8 @@
 #define _SIZE ((op>>11) & 0x1F)
 #define _IMM16 (signed short)(op & 0xFFFF)
 #define _IMM26 (op & 0x03FFFFFF)
+
+
 
 namespace MIPSComp
 {
@@ -200,13 +202,6 @@ namespace MIPSComp
 				SetCC(CC_GT);
 				VMOV(fpr.V(vregs[i]), S1);
 				SetCC(CC_AL);
-
-				/*
-				VABS(S1, fpr.V(vregs[i]));                  // S1 = fabs(x)
-				VSUB(fpr.V(vregs[i]), fpr.V(vregs[i]), S0); // S2 = fabs(x-0.5f) {VABD}
-				VABS(fpr.V(vregs[i]), fpr.V(vregs[i]));
-				VSUB(fpr.V(vregs[i]), S1, fpr.V(vregs[i])); // v[i] = S1 - S2 + 0.5f
-				VADD(fpr.V(vregs[i]), fpr.V(vregs[i]), S0);*/
 			} else if (sat == 3) {
 				fpr.MapRegV(vregs[i], MAP_DIRTY);
 
@@ -222,16 +217,6 @@ namespace MIPSComp
 				SetCC(CC_GT);
 				VMOV(fpr.V(vregs[i]), S1);
 				SetCC(CC_AL);
-
-				// clamped = fabs(x) - fabs(x-1.0f);        // [-1, 1]
-				/*
-				fpr.MapRegV(vregs[i], MAP_DIRTY);
-				MOVI2F(S0, 1.0f, R0);
-				VABS(S1, fpr.V(vregs[i]));                  // S1 = fabs(x)
-				VSUB(fpr.V(vregs[i]), fpr.V(vregs[i]), S0); // S2 = fabs(x-1.0f) {VABD}
-				VABS(fpr.V(vregs[i]), fpr.V(vregs[i]));
-				VSUB(fpr.V(vregs[i]), S1, fpr.V(vregs[i])); // v[i] = S1 - S2
-				*/
 			}
 		}
 	}
@@ -1851,12 +1836,13 @@ namespace MIPSComp
 			// care of NaNs like the interpreter (ignores them and just operates on the bits).
 			MOVI2F(S0, 0.0f, R0);
 			VCMP(fpr.V(sregs[i]), S0);
-			VMRS_APSR(); // Move FP flags from FPSCR to APSR (regular flags).
 			VMOV(R0, fpr.V(sregs[i]));
+			VMRS_APSR(); // Move FP flags from FPSCR to APSR (regular flags).
+			SetCC(CC_NEQ);
 			AND(R0, R0, AssumeMakeOperand2(0x80000000));
 			ORR(R0, R0, AssumeMakeOperand2(0x3F800000));
 			SetCC(CC_EQ);
-			MOV(R1, AssumeMakeOperand2(0x0));
+			MOV(R0, AssumeMakeOperand2(0x0));
 			SetCC(CC_AL);
 			VMOV(fpr.V(tempregs[i]), R0);
 		}

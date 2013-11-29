@@ -42,7 +42,8 @@ ARCH_FILES := \
   $(SRC)/Core/MIPS/x86/Asm.cpp \
   $(SRC)/Core/MIPS/x86/Jit.cpp \
   $(SRC)/Core/MIPS/x86/RegCache.cpp \
-  $(SRC)/Core/MIPS/x86/RegCacheFPU.cpp
+  $(SRC)/Core/MIPS/x86/RegCacheFPU.cpp \
+  $(SRC)/GPU/GLES/VertexDecoderX86.cpp
 endif
 
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
@@ -61,6 +62,7 @@ ARCH_FILES := \
   $(SRC)/Core/MIPS/ARM/ArmJit.cpp \
   $(SRC)/Core/MIPS/ARM/ArmRegCache.cpp \
   $(SRC)/Core/MIPS/ARM/ArmRegCacheFPU.cpp \
+  $(SRC)/GPU/GLES/VertexDecoderArm.cpp \
   ArmEmitterTest.cpp
 endif
 
@@ -79,6 +81,7 @@ ARCH_FILES := \
   $(SRC)/Core/MIPS/ARM/ArmJit.cpp \
   $(SRC)/Core/MIPS/ARM/ArmRegCache.cpp \
   $(SRC)/Core/MIPS/ARM/ArmRegCacheFPU.cpp \
+  $(SRC)/GPU/GLES/VertexDecoderArm.cpp \
   ArmEmitterTest.cpp
 endif
 
@@ -224,6 +227,7 @@ EXEC_AND_LIB_FILES := \
   $(SRC)/Core/HLE/sceMp4.cpp \
   $(SRC)/Core/HLE/sceMp3.cpp \
   $(SRC)/Core/HLE/sceNet.cpp \
+  $(SRC)/Core/HLE/proAdhoc.cpp \
   $(SRC)/Core/HLE/sceNetAdhoc.cpp \
   $(SRC)/Core/HLE/sceOpenPSID.cpp \
   $(SRC)/Core/HLE/sceP3da.cpp \

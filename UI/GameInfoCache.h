@@ -35,7 +35,7 @@ class GameInfo {
 public:
 	GameInfo()
 		: fileType(FILETYPE_UNKNOWN), paramSFOLoaded(false), iconTexture(NULL), pic0Texture(NULL), pic1Texture(NULL),
-			wantBG(false), gameSize(0), saveDataSize(0), installDataSize(0) {}
+		  wantBG(false), gameSize(0), saveDataSize(0), installDataSize(0), disc_total(0), disc_number(0) {}
 
 	bool DeleteGame();  // Better be sure what you're doing when calling this.
 	bool DeleteAllSaveData();
@@ -59,6 +59,8 @@ public:
 	std::string title;  // for easy access, also available in paramSFO.
 	std::string id;
 	std::string id_version;
+	int disc_total;
+	int disc_number;
 	IdentifiedFileType fileType;
 	ParamSFOData paramSFO;
 	bool paramSFOLoaded;

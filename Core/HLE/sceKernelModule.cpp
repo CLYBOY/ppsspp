@@ -47,6 +47,8 @@
 #include "Core/HLE/sceIo.h"
 #include "Core/HLE/KernelWaitHelpers.h"
 
+#include "GPU/GPUState.h"
+
 enum {
 	PSP_THREAD_ATTR_USER = 0x80000000
 };
@@ -257,7 +259,7 @@ public:
 		// Add the symbol to the symbol map for debugging.
 		char temp[256];
 		sprintf(temp,"zz_%s", GetFuncName(func.moduleName, func.nid));
-		symbolMap.AddSymbol(temp, func.stubAddr, 8, ST_FUNCTION);
+		symbolMap.AddFunction(temp,func.stubAddr,8);
 
 		// Keep track and actually hook it up if possible.
 		importedFuncs.push_back(func);
@@ -1223,6 +1225,7 @@ bool __KernelLoadExec(const char *filename, u32 paramPtr, std::string *error_str
 		//HLE needs to be reset here
 		HLEShutdown();
 		HLEInit();
+		GPU_Reinitialize();
 	}
 
 	__KernelModuleInit();
