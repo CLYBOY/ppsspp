@@ -531,6 +531,10 @@ add_library(native STATIC
 	native/base/timeutil.h
 	native/data/compression.cpp
 	native/data/compression.h
+	native/ext/vjson/json.cpp
+	native/ext/vjson/json.h
+	native/ext/vjson/block_allocator.cpp
+	native/ext/vjson/block_allocator.h
 	native/file/chunk_file.cpp
 	native/file/chunk_file.h
 	native/file/dialog.cpp

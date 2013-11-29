@@ -496,11 +496,16 @@
     <ClCompile Include="Dialog\PSPNetconfDialog.cpp">
       <Filter>Dialog</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="Debugger\DisassemblyManager.cpp">
       <Filter>Debugger</Filter>
     </ClCompile>
     <ClCompile Include="HLE\proAdhoc.cpp">
       <Filter>HLE\Libraries</Filter>
+=======
+    <ClCompile Include="Util\GameManager.cpp">
+      <Filter>Util</Filter>
+>>>>>>> origin/homebrew-store
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -921,6 +926,7 @@
     <ClInclude Include="MIPS\JitCommon\JitState.h">
       <Filter>MIPS\JitCommon</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="MIPS\ARM\ArmCompVFPUNEON.cpp">
       <Filter>MIPS\ARM</Filter>
     </ClInclude>
@@ -929,6 +935,10 @@
     </ClInclude>
     <ClInclude Include="HLE\proAdhoc.h">
       <Filter>HLE\Libraries</Filter>
+=======
+    <ClInclude Include="Util\GameManager.h">
+      <Filter>Util</Filter>
+>>>>>>> origin/homebrew-store
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
