@@ -52,7 +52,7 @@ bool GameManager::DownloadAndInstall(std::string storeZipUrl) {
 
 	// TODO: Android-compatible temp file names
 	std::string filename = GetTempFilename();
-	curDownload_ = downloader_.StartDownload(storeZipUrl, filename);
+	curDownload_ = g_DownloadManager.StartDownload(storeZipUrl, filename);
 	return true;
 }
 
@@ -94,8 +94,8 @@ void GameManager::Update() {
 			// Doesn't matter if the install succeeds or not, we delete the temp file to not squander space.
 			// TODO: Handle disk full?
 			deleteFile(zipName.c_str());
-			curDownload_.reset();
 		}
+		curDownload_.reset();
 	}
 }
 
@@ -158,7 +158,6 @@ void GameManager::InstallGame(std::string zipfile) {
 		// Note that we do NOT write files that are not in a directory, to avoid random
 		// README files etc.
 		if (strstr(fn, "/") != 0) {
-			INFO_LOG(HLE, "File: %i: %s", i, fn);
 			struct zip_stat zstat;
 			int x = zip_stat_index(z, i, 0, &zstat);
 			size_t size = zstat.size;
@@ -170,7 +169,9 @@ void GameManager::InstallGame(std::string zipfile) {
 			std::string outFilename = pspGame + fn;
 			bool isDir = outFilename.back() == '/';
 			if (!isDir) {
-				INFO_LOG(HLE, "Writing %i bytes to %s", (int)size, outFilename.c_str());
+				if (i < 10) {
+					INFO_LOG(HLE, "Writing %i bytes to %s", (int)size, outFilename.c_str());
+				}
 				FILE *f = fopen(outFilename.c_str(), "wb");
 				if (f) {
 					fwrite(buffer, 1, size, f);
@@ -182,6 +183,7 @@ void GameManager::InstallGame(std::string zipfile) {
 			}
 		}
 	}
+	INFO_LOG(HLE, "Extracted %i files.", numFiles);
 
 	zip_close(z);
 }
