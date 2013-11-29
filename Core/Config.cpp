@@ -92,7 +92,7 @@ void Config::Load(const char *iniFileName, const char *controllerIniFilename) {
 	general->Get("RewindFlipFrequency", &iRewindFlipFrequency, 0);
 	general->Get("GridView1", &bGridView1, true);
 	general->Get("GridView2", &bGridView2, true);
-	general->Get("GridView3", &bGridView3, true);
+	general->Get("GridView3", &bGridView3, false);
 
 	// "default" means let emulator decide, "" means disable.
 	general->Get("ReportingHost", &sReportHost, "default");
@@ -378,7 +378,7 @@ void Config::Save() {
 		}
 
 		IniFile::Section *general = iniFile.GetOrCreateSection("General");
-		
+
 		// Need to do this somewhere...
 		bFirstRun = false;
 		general->Set("FirstRun", bFirstRun);
@@ -409,10 +409,10 @@ void Config::Save() {
 		general->Set("GridView1", bGridView1);
 		general->Set("GridView2", bGridView2);
 		general->Set("GridView3", bGridView3);
-		
+
 		IniFile::Section *recent = iniFile.GetOrCreateSection("Recent");
 		recent->Set("MaxRecent", iMaxRecent);
-	
+
 		for (int i = 0; i < iMaxRecent; i++) {
 			char keyName[64];
 			sprintf(keyName,"FileName%d",i);
@@ -420,13 +420,13 @@ void Config::Save() {
 				recent->Set(keyName, recentIsos[i]);
 			} else {
 				recent->Delete(keyName); // delete the nonexisting FileName
-			} 
+			}
 		}
 
 		IniFile::Section *cpu = iniFile.GetOrCreateSection("CPU");
 		cpu->Set("Jit", bJit);
 		cpu->Set("SeparateCPUThread", bSeparateCPUThread);
-		cpu->Set("AtomicAudioLocks", bAtomicAudioLocks);	
+		cpu->Set("AtomicAudioLocks", bAtomicAudioLocks);
 		cpu->Set("SeparateIOThread", bSeparateIOThread);
 		cpu->Set("FastMemory", bFastMemory);
 		cpu->Set("CPUSpeed", iLockedCPUSpeed);
@@ -448,7 +448,7 @@ void Config::Save() {
 		graphics->Set("VertexDecoderJit", bVertexDecoderJit);
 #ifdef _WIN32
 		graphics->Set("FullScreen", bFullScreen);
-#endif		
+#endif
 #ifdef BLACKBERRY
 		graphics->Set("PartialStretch", bPartialStretch);
 #endif

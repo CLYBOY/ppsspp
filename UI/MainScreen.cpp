@@ -321,8 +321,8 @@ void GameBrowser::Refresh() {
 	Add(new Spacer(5.0f));
 	I18NCategory *m = GetI18NCategory("MainMenu");
 
+	LinearLayout *topBar = new LinearLayout(ORIENT_HORIZONTAL, new LinearLayoutParams(FILL_PARENT, WRAP_CONTENT));
 	if (allowBrowsing_) {
-		LinearLayout *topBar = new LinearLayout(ORIENT_HORIZONTAL, new LinearLayoutParams(FILL_PARENT, WRAP_CONTENT));
 		Margins pathMargins(5, 0);
 		topBar->Add(new TextView(path_.GetFriendlyPath().c_str(), ALIGN_VCENTER, true, new LinearLayoutParams(WRAP_CONTENT, FILL_PARENT, 1.0f, pathMargins)));
 #if defined(_WIN32) || defined(USING_QT_UI)
@@ -330,13 +330,15 @@ void GameBrowser::Refresh() {
 #else
 		topBar->Add(new Choice(m->T("Home")))->OnClick.Handle(this, &GameBrowser::HomeClick);
 #endif
-		ChoiceStrip *layoutChoice = topBar->Add(new ChoiceStrip(ORIENT_HORIZONTAL));
-		layoutChoice->AddChoice(I_GRID);
-		layoutChoice->AddChoice(I_LINES);
-		layoutChoice->SetSelection(*gridStyle_ ? 0 : 1);
-		layoutChoice->OnChoice.Handle(this, &GameBrowser::LayoutChange);
-		Add(topBar);
 	}
+
+	topBar->Add(new Spacer(new LinearLayoutParams(1.0f)));
+	ChoiceStrip *layoutChoice = topBar->Add(new ChoiceStrip(ORIENT_HORIZONTAL));
+	layoutChoice->AddChoice(I_GRID);
+	layoutChoice->AddChoice(I_LINES);
+	layoutChoice->SetSelection(*gridStyle_ ? 0 : 1);
+	layoutChoice->OnChoice.Handle(this, &GameBrowser::LayoutChange);
+	Add(topBar);
 
 	if (*gridStyle_) {
 		gameList_ = new UI::GridLayout(UI::GridLayoutSettings(150, 85), new LinearLayoutParams(FILL_PARENT, WRAP_CONTENT));
@@ -482,7 +484,6 @@ void MainScreen::CreateViews() {
 	tabAllGames->OnHoldChoice.Handle(this, &MainScreen::OnGameSelected);
 	tabHomebrew->OnHoldChoice.Handle(this, &MainScreen::OnGameSelected);
 
-
 	if (g_Config.recentIsos.size() > 0) {
 		leftColumn->SetCurrentTab(0);
 	} else {
@@ -492,14 +493,13 @@ void MainScreen::CreateViews() {
 		leftColumn->SetCurrentTab(2);
 		backFromStore_ = false;
 	}
-/*
-	if (info) {	
+
+/* if (info) {
 		texvGameIcon_ = leftColumn->Add(new TextureView(0, IS_DEFAULT, new AnchorLayoutParams(144 * 2, 80 * 2, 10, 10, NONE, NONE)));
 		tvTitle_ = leftColumn->Add(new TextView(0, info->title, ALIGN_LEFT, 1.0f, new AnchorLayoutParams(10, 200, NONE, NONE)));
 		tvGameSize_ = leftColumn->Add(new TextView(0, "...", ALIGN_LEFT, 1.0f, new AnchorLayoutParams(10, 250, NONE, NONE)));
 		tvSaveDataSize_ = leftColumn->Add(new TextView(0, "...", ALIGN_LEFT, 1.0f, new AnchorLayoutParams(10, 290, NONE, NONE)));
-	}
-	*/
+	} */
 
 	ViewGroup *rightColumn = new ScrollView(ORIENT_VERTICAL);
 	LinearLayout *rightColumnItems = new LinearLayout(ORIENT_VERTICAL, new LinearLayoutParams(FILL_PARENT, WRAP_CONTENT));
@@ -536,8 +536,8 @@ void MainScreen::CreateViews() {
 	if (vertical) {
 		root_ = new LinearLayout(ORIENT_VERTICAL);
 		rightColumn->ReplaceLayoutParams(new LinearLayoutParams(FILL_PARENT, WRAP_CONTENT));
-		leftColumn->ReplaceLayoutParams(new LinearLayoutParams(1.0));		
-		root_->Add(rightColumn);		
+		leftColumn->ReplaceLayoutParams(new LinearLayoutParams(1.0));
+		root_->Add(rightColumn);
 		root_->Add(leftColumn);
 	} else {
 		root_ = new LinearLayout(ORIENT_HORIZONTAL);
@@ -748,7 +748,7 @@ GamePauseScreen::~GamePauseScreen() {
 }
 
 void GamePauseScreen::CreateViews() {
-	static const int NUM_SAVESLOTS = 5; 
+	static const int NUM_SAVESLOTS = 5;
 
 	using namespace UI;
 	Margins actionMenuMargins(0, 100, 15, 0);
